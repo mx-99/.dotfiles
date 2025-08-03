@@ -32,7 +32,10 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-1337)
+(map! :leader
+      :desc "Load new theme" "h t" #'counsel-load-theme)
+
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -74,3 +77,86 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+
+;; Delete files to trash can
+(setq delete-by-moving-to-trash t
+      trash-directory "~/.local/share/Trash/files/")
+
+
+;;Fonts
+(setq doom-font (font-spec :family "SauceCodePro Nerd Font Mono" :size 18)
+      doom-variable-pitch-font (font-spec :family "Ubuntu Nerd Font" :size 15)
+      doom-big-font (font-spec :family "RobotoMono Nerd Font Mono" :size 24))
+(after! doom-themes
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t))
+(custom-set-faces!
+  '(font-lock-comment-face :slant italic)
+  '(font-lock-keyword-face :slant italic))
+
+;; Line settings
+(setq display-line-numbers-type t)
+(map! :leader
+      :desc "Comment or uncomment lines"      "TAB TAB" #'comment-line
+      (:prefix ("t" . "toggle")
+       :desc "Toggle line numbers"            "l" #'doom/toggle-line-numbers
+       :desc "Toggle line highlight in frame" "h" #'hl-line-mode
+       :desc "Toggle line highlight globally" "H" #'global-hl-line-mode
+       :desc "Toggle truncate lines"          "t" #'toggle-truncate-lines))
+
+;; Markdown
+(custom-set-faces
+ '(markdown-header-face ((t (:inherit font-lock-function-name-face :weight bold :family "variable-pitch"))))
+ '(markdown-header-face-1 ((t (:inherit markdown-header-face :height 1.7))))
+ '(markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.6))))
+ '(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.5))))
+ '(markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.4))))
+ '(markdown-header-face-5 ((t (:inherit markdown-header-face :height 1.3))))
+ '(markdown-header-face-6 ((t (:inherit markdown-header-face :height 1.2)))))
+
+;;Minimap
+(setq minimap-window-location 'right)
+(map! :leader
+      (:prefix ("t" . "toggle")
+       :desc "Toggle minimap-mode" "m" #'minimap-mode))
+
+;;Modeline
+(set-face-attribute 'mode-line nil :font "Roboto Mono Nerd Font")
+(setq doom-modeline-height 30     ;; sets modeline height
+      doom-modeline-bar-width 5   ;; sets right bar width
+      doom-modeline-persp-name t  ;; adds perspective name to modeline
+      doom-modeline-persp-icon t) ;; adds folder icon next to persp name
+
+;; Neotree
+(after! neotree
+  (setq neo-smart-open t
+        neo-window-fixed-size nil))
+(after! doom-themes
+  (setq doom-neotree-enable-variable-pitch t))
+(map! :leader
+      :desc "Toggle neotree file viewer" "t n" #'neotree-toggle
+      :desc "Open directory in neotree"  "d n" #'neotree-dir)
+
+;; web dev
+;; Enable web development features (HTML, CSS, JS)
+(use-package! web-mode
+  :mode ("\\.html?\\'" "\\.css\\'" "\\.js\\'" "\\.jsx\\'" "\\.tsx\\'"))
+
+;; Enable live server functionality using `lsp-mode` and `web-mode`
+(use-package! lsp-mode
+  :commands (lsp lsp-deferred)
+  :config
+  (setq lsp-prefer-flymake nil))  ;; Optional for error checking
+
+(map! :leader
+      :desc "Start Live Server"
+      "c l" #'my-live-server-start)
+
+(defun my-live-server-start ()
+  "Start live-server for the current project."
+  (interactive)
+  (let ((default-directory (or (projectile-project-root) default-directory)))
+    (start-process "live-server" "*live-server*" "live-server" ".")))
+
+(use-package! emmet-mode
+  :hook (web-mode . emmet-mode))
